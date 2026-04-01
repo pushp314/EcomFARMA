@@ -5,7 +5,7 @@ const { prisma } = require('../config/db');
 // @access  Public
 const getProducts = async (req, res, next) => {
   try {
-    const { category, search } = req.query;
+    const { category, search, minPrice, maxPrice, sort } = req.query;
 
     let whereClause = {};
 
@@ -14,17 +14,31 @@ const getProducts = async (req, res, next) => {
     }
 
     if (search) {
-      whereClause.name = { contains: search, mode: 'insensitive' };
+      whereClause.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } },
+      ];
     }
+
+    if (minPrice || maxPrice) {
+      whereClause.price = {};
+      if (minPrice) whereClause.price.gte = parseFloat(minPrice);
+      if (maxPrice) whereClause.price.lte = parseFloat(maxPrice);
+    }
+
+    let orderBy = { createdAt: 'desc' };
+    if (sort === 'price-low') orderBy = { price: 'asc' };
+    if (sort === 'price-high') orderBy = { price: 'desc' };
+    if (sort === 'newest') orderBy = { createdAt: 'desc' };
 
     const products = await prisma.product.findMany({
       where: whereClause,
       include: {
         farmer: {
-          select: { name: true, farmName: true, city: true, state: true, latitude: true, longitude: true },
+          select: { name: true, farmName: true, city: true, state: true },
         },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy,
     });
 
     res.status(200).json({ success: true, products });

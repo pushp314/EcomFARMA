@@ -35,6 +35,7 @@ export const orderAPI = {
   getById: (id) => API.get(`/orders/${id}`),
   updateStatus: (id, data) => API.put(`/orders/${id}/status`, data),
   getFarmerOrders: () => API.get('/orders/farmer'),
+  getFarmerStats: () => API.get('/orders/farmer/stats'),
 };
 
 // Payment APIs

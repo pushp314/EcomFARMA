@@ -14,6 +14,7 @@ import Home from './pages/Home';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import Marketplace from './pages/Marketplace';
+import About from './pages/About';
 import ProductDetails from './pages/ProductDetails';
 import Cart from './pages/Cart';
 import Dashboard from './pages/Dashboard';
@@ -21,6 +22,7 @@ import CustomerOrders from './components/orders/CustomerOrders';
 import Profile from './pages/Profile';
 import FarmerDashboard from './pages/farmer/FarmerDashboard';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import OrderDetails from './pages/OrderDetails';
 
 import { CartProvider } from './context/CartContext';
 
@@ -101,6 +103,14 @@ function App() {
             }
           />
           <Route
+            path="/about"
+            element={
+              <MainLayout>
+                <About />
+              </MainLayout>
+            }
+          />
+          <Route
             path="/product/:id"
             element={
               <MainLayout>
@@ -146,6 +156,16 @@ function App() {
                   <div className="container-custom py-12">
                     <CustomerOrders />
                   </div>
+                </ProtectedRoute>
+              </MainLayout>
+            }
+          />
+           <Route
+            path="/order/:id"
+            element={
+              <MainLayout>
+                <ProtectedRoute>
+                  <OrderDetails />
                 </ProtectedRoute>
               </MainLayout>
             }

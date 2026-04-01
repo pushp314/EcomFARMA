@@ -23,6 +23,8 @@ const Navbar = () => {
   const profileRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
+  const isHomePage = location.pathname === '/';
+  const isNavbarLight = !scrolled && isHomePage;
 
   // Scroll effect
   useEffect(() => {
@@ -68,7 +70,7 @@ const Navbar = () => {
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled
+        scrolled || !isHomePage
           ? 'bg-white/95 backdrop-blur-xl shadow-lg shadow-gray-200/50 border-b border-gray-100'
           : 'bg-transparent'
       }`}
@@ -81,10 +83,10 @@ const Navbar = () => {
               <GiWheat className="text-white text-xl" />
             </div>
             <div className="flex flex-col">
-              <span className="font-display font-bold text-lg leading-tight text-gray-900">
-                Farm<span className="text-primary-600">Fresh</span>
+              <span className={`font-display font-bold text-lg leading-tight transition-colors duration-300 ${isNavbarLight ? 'text-white' : 'text-gray-900'}`}>
+                Farm<span className={isNavbarLight ? 'text-primary-300' : 'text-primary-600'}>Fresh</span>
               </span>
-              <span className="text-[10px] text-gray-500 font-medium tracking-wider uppercase -mt-0.5">
+              <span className={`text-[10px] font-medium tracking-wider uppercase -mt-0.5 transition-colors duration-300 ${isNavbarLight ? 'text-primary-100' : 'text-gray-500'}`}>
                 Farm to Table
               </span>
             </div>
@@ -98,8 +100,8 @@ const Navbar = () => {
                 to={link.path}
                 className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
                   location.pathname === link.path
-                    ? 'text-primary-700 bg-primary-50'
-                    : 'text-gray-600 hover:text-primary-600 hover:bg-gray-50'
+                    ? (isNavbarLight ? 'text-primary-900 bg-white shadow-md' : 'text-primary-700 bg-primary-50')
+                    : (isNavbarLight ? 'text-white/80 hover:text-white hover:bg-white/10' : 'text-gray-600 hover:text-primary-600 hover:bg-gray-50')
                 }`}
               >
                 {link.name}
@@ -109,23 +111,27 @@ const Navbar = () => {
 
           {/* Desktop Actions */}
           <div className="hidden lg:flex items-center gap-3">
+            {/* Cart (for guests and customers) */}
+            {!isFarmer && !isAdmin && (
+              <Link
+                to="/cart"
+                className={`relative p-2.5 rounded-xl transition-all duration-200 ${
+                  isNavbarLight 
+                    ? 'text-white hover:bg-white/10'
+                    : 'text-gray-600 hover:text-primary-600 hover:bg-primary-50' 
+                }`}
+              >
+                <HiOutlineShoppingCart className="text-xl" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-primary-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-sm">
+                    {cartCount}
+                  </span>
+                )}
+              </Link>
+            )}
+
             {isAuthenticated ? (
               <>
-                {/* Cart (for customers) */}
-                {!isFarmer && !isAdmin && (
-                  <Link
-                    to="/cart"
-                    className="relative p-2.5 text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-xl transition-all duration-200"
-                  >
-                    <HiOutlineShoppingCart className="text-xl" />
-                    {cartCount > 0 && (
-                      <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-primary-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-sm">
-                        {cartCount}
-                      </span>
-                    )}
-                  </Link>
-                )}
-
                 {/* Profile Dropdown */}
                 <div className="relative" ref={profileRef}>
                   <button
@@ -198,24 +204,45 @@ const Navbar = () => {
               <>
                 <Link
                   to="/login"
-                  className="px-5 py-2.5 text-sm font-semibold text-gray-700 hover:text-primary-600 transition-colors"
+                  className={`px-5 py-2.5 text-sm font-semibold transition-colors ${
+                    isNavbarLight ? 'text-white hover:text-primary-200' : 'text-gray-700 hover:text-primary-600'
+                  }`}
                 >
                   Sign In
                 </Link>
-                <Link to="/register" className="btn-primary text-sm">
+                <Link to="/register" className={`btn-primary text-sm ${isNavbarLight && 'bg-white text-primary-700 hover:bg-primary-50 shadow-lg'}`}>
                   Get Started
                 </Link>
               </>
             )}
           </div>
 
-          {/* Mobile Toggle */}
-          <button
-            className="lg:hidden p-2 text-gray-600 hover:text-primary-600 hover:bg-gray-50 rounded-xl transition-all"
-            onClick={() => setMobileOpen(!mobileOpen)}
-          >
-            {mobileOpen ? <HiOutlineX className="text-2xl" /> : <HiOutlineMenu className="text-2xl" />}
-          </button>
+          {/* Mobile Actions & Toggle */}
+          <div className="flex lg:hidden items-center gap-1">
+            {!isFarmer && !isAdmin && (
+              <Link
+                to="/cart"
+                className={`relative p-2 rounded-xl transition-all ${
+                  isNavbarLight ? 'text-white hover:bg-white/10' : 'text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                <HiOutlineShoppingCart className="text-[22px]" />
+                {cartCount > 0 && (
+                  <span className="absolute top-0 right-0 w-4 h-4 bg-primary-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center shadow-sm">
+                    {cartCount}
+                  </span>
+                )}
+              </Link>
+            )}
+            <button
+              className={`p-2 rounded-xl transition-all ${
+                isNavbarLight ? 'text-white hover:bg-white/10' : 'text-gray-600 hover:bg-gray-50'
+              }`}
+              onClick={() => setMobileOpen(!mobileOpen)}
+            >
+              {mobileOpen ? <HiOutlineX className="text-2xl" /> : <HiOutlineMenu className="text-2xl" />}
+            </button>
+          </div>
         </div>
       </div>
 

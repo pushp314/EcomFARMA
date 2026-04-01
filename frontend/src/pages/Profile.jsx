@@ -2,17 +2,17 @@ import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { authAPI, uploadAPI } from '../api';
 import toast from 'react-hot-toast';
+import { HiOutlineUser, HiOutlineCamera, HiOutlineLocationMarker, HiOutlinePhone, HiOutlineMail } from 'react-icons/hi';
 
 const Profile = () => {
-  const { user, login } = useAuth(); // login actually updates user state inside context if we pass new token/user but we might need a refresh logic. 
-  // Wait, in AuthContext `login` takes token and sets it. `getMe` fetches user. Let's just reload page after update for simplicity or rely on getMe.
+  const { user } = useAuth();
 
   const [formData, setFormData] = useState({
     name: user?.name || '',
     email: user?.email || '',
     phone: user?.phone || '',
     farmName: user?.farmName || '',
-    bio: user?.bio || '',
+    bio: user?.farmDescription || user?.bio || '',
     street: user?.address?.street || '',
     city: user?.address?.city || '',
     state: user?.address?.state || '',
@@ -20,7 +20,7 @@ const Profile = () => {
   });
 
   const [selectedFile, setSelectedFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState(user?.avatarUrl || '');
+  const [imagePreview, setImagePreview] = useState(user?.avatar?.url || '');
   const [loading, setLoading] = useState(false);
 
   const handleFileSelect = (e) => {
@@ -38,9 +38,8 @@ const Profile = () => {
     setLoading(true);
 
     try {
-      let avatarUrl = user?.avatarUrl;
+      let avatarUrl = user?.avatar?.url;
 
-      // Handle avatar upload if new file is selected
       if (selectedFile) {
         const fileData = new FormData();
         fileData.append('image', selectedFile);
@@ -48,7 +47,6 @@ const Profile = () => {
         avatarUrl = data.url; 
       }
 
-      // Structure data correctly for backend
       const updatePayload = {
         name: formData.name,
         phone: formData.phone,
@@ -61,17 +59,15 @@ const Profile = () => {
         avatarUrl: avatarUrl
       };
 
-      const res = await authAPI.updateProfile(updatePayload);
+      await authAPI.updateProfile(updatePayload);
+      toast.success('Identity profile synchronized!');
       
-      toast.success('Profile updated successfully!');
-      
-      // Force reload to let AuthContext getMe pull latest user data
       setTimeout(() => {
         window.location.reload();
-      }, 1500);
+      }, 1000);
 
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to update profile');
+      toast.error('Sync failed');
     } finally {
       setLoading(false);
     }
@@ -80,98 +76,129 @@ const Profile = () => {
   if (!user) return null;
 
   return (
-    <div className="container-custom py-12">
-      <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="bg-gradient-to-r from-green-600 to-green-700 px-8 py-12 text-white text-center relative">
-          <h1 className="text-3xl font-display font-bold">Profile Settings</h1>
-          <p className="opacity-90 mt-2">Update your personal information and address</p>
+    <div className="bg-gray-50 min-h-screen py-16">
+      <div className="container-custom max-w-5xl">
+        <div className="bg-white rounded-[3rem] shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden animate-fade-in">
           
-          <div className="absolute -bottom-12 left-1/2 -translate-x-1/2">
-            <div className="relative group cursor-pointer inline-block">
-              <div className="w-24 h-24 rounded-full border-4 border-white bg-white overflow-hidden shadow-md">
-                <img 
-                  src={imagePreview || 'https://via.placeholder.com/150'} 
-                  alt="Avatar" 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <label className="absolute inset-0 flex items-center justify-center bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                <span className="text-xs font-bold">Change</span>
-                <input type="file" className="hidden" accept="image/*" onChange={handleFileSelect} />
-              </label>
-            </div>
+          <div className="bg-primary-600 px-12 py-16 text-white relative">
+             <div className="max-w-2xl">
+                <h1 className="text-4xl font-display font-bold mb-2">Private Profile</h1>
+                <p className="opacity-70 text-sm font-medium tracking-wide">Securely manage your personal credentials and logistics details</p>
+             </div>
+             <div className="absolute -bottom-16 left-12">
+                <div className="relative group">
+                   <div className="w-32 h-32 rounded-[2.5rem] bg-white p-1.5 shadow-2xl overflow-hidden group-hover:scale-105 transition-transform duration-500">
+                      <div className="w-full h-full rounded-[2rem] overflow-hidden bg-gray-100">
+                         <img 
+                          src={imagePreview || `https://ui-avatars.com/api/?name=${user.name}&background=16a34a&color=fff`} 
+                          alt="Profile" 
+                          className="w-full h-full object-cover"
+                         />
+                      </div>
+                   </div>
+                   <label className="absolute bottom-1 -right-1 p-3 bg-white text-primary-600 rounded-2xl shadow-xl border border-gray-100 cursor-pointer hover:bg-primary-600 hover:text-white transition-all transform active:scale-90">
+                      <HiOutlineCamera className="text-xl" />
+                      <input type="file" className="hidden" accept="image/*" onChange={handleFileSelect} />
+                   </label>
+                </div>
+             </div>
           </div>
+
+          <form onSubmit={handleUpdate} className="px-12 pt-24 pb-12 space-y-12">
+             <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+                
+                {/* Column 1: Identity */}
+                <div className="lg:col-span-1 space-y-6">
+                   <h3 className="font-bold text-gray-900 flex items-center gap-2">
+                      <HiOutlineUser className="text-primary-600" />
+                      Legal Identity
+                   </h3>
+                   <div className="space-y-4">
+                      <div className="space-y-1">
+                         <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Account Display Name</label>
+                         <input type="text" className="w-full bg-gray-50 border-none rounded-2xl py-3 px-4 focus:ring-2 focus:ring-primary-500 text-sm" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+                      </div>
+                      <div className="space-y-1">
+                         <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Verified Email</label>
+                         <div className="flex items-center gap-2 px-4 py-3 bg-gray-50 rounded-2xl text-sm text-gray-400 border border-gray-100">
+                           <HiOutlineMail />
+                           {formData.email}
+                         </div>
+                      </div>
+                      <div className="space-y-1">
+                         <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Phone Number</label>
+                         <div className="relative">
+                            <HiOutlinePhone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" />
+                            <input type="tel" className="w-full bg-gray-50 border-none rounded-2xl py-3 pl-10 pr-4 focus:ring-2 focus:ring-primary-500 text-sm" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} />
+                         </div>
+                      </div>
+                   </div>
+                </div>
+
+                {/* Column 2: Specific Info (Farmer etc) */}
+                <div className="lg:col-span-2 space-y-8">
+                   {user.role === 'farmer' ? (
+                     <div className="space-y-6">
+                        <h3 className="font-bold text-gray-900 border-b border-gray-100 pb-4">Merchant Credentials</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                           <div className="space-y-1">
+                              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Farm Business Name</label>
+                              <input type="text" className="w-full bg-gray-50 border-none rounded-2xl py-3 px-4 focus:ring-2 focus:ring-primary-500 text-sm" value={formData.farmName} onChange={e => setFormData({...formData, farmName: e.target.value})} />
+                           </div>
+                           <div className="md:col-span-2 space-y-1">
+                              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Mission / Biography</label>
+                              <textarea className="w-full bg-gray-50 border-none rounded-2xl py-3 px-4 focus:ring-2 focus:ring-primary-500 text-sm h-32" value={formData.bio} onChange={e => setFormData({...formData, bio: e.target.value})} />
+                           </div>
+                        </div>
+                     </div>
+                   ) : (
+                     <div className="h-full flex flex-col justify-center bg-primary-50/50 p-8 rounded-[2rem] border border-primary-100 italic text-primary-600 text-sm text-center">
+                        <span className="text-3xl mb-2 not-italic">🏘️</span>
+                        "Freshly grown, ethically sourced. Your profile details help us deliver nature’s best directly to your doorstep."
+                     </div>
+                   )}
+
+                   <div className="space-y-6">
+                      <h3 className="font-bold text-gray-900 flex items-center gap-2 border-b border-gray-100 pb-4">
+                         <HiOutlineLocationMarker className="text-primary-600" />
+                         Shipping Hub & Logistics
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                         <div className="md:col-span-2 space-y-1">
+                            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Base Street Office / Home</label>
+                            <input type="text" className="w-full bg-gray-50 border-none rounded-2xl py-3 px-4 focus:ring-2 focus:ring-primary-500 text-sm" value={formData.street} onChange={e => setFormData({...formData, street: e.target.value})} />
+                         </div>
+                         <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">City Hub</label>
+                            <input type="text" className="w-full bg-gray-50 border-none rounded-2xl py-3 px-4 focus:ring-2 focus:ring-primary-500 text-sm" value={formData.city} onChange={e => setFormData({...formData, city: e.target.value})} />
+                         </div>
+                         <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                               <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Region/State</label>
+                               <input type="text" className="w-full bg-gray-50 border-none rounded-2xl py-3 px-4 focus:ring-2 focus:ring-primary-500 text-sm" value={formData.state} onChange={e => setFormData({...formData, state: e.target.value})} />
+                            </div>
+                            <div className="space-y-1">
+                               <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Zip Code</label>
+                               <input type="text" className="w-full bg-gray-50 border-none rounded-2xl py-3 px-4 focus:ring-2 focus:ring-primary-500 text-sm" value={formData.pincode} onChange={e => setFormData({...formData, pincode: e.target.value})} />
+                            </div>
+                         </div>
+                      </div>
+                   </div>
+                </div>
+             </div>
+
+             <div className="pt-8 flex justify-end">
+                <button type="submit" disabled={loading} className="w-full md:w-auto btn-primary py-4 px-12 rounded-2xl shadow-xl shadow-primary-500/20 font-bold tracking-wide flex items-center justify-center gap-3">
+                   {loading ? (
+                     <>
+                       <div className="w-5 h-5 rounded-full border-2 border-white/30 border-t-white animate-spin"></div>
+                       Synchronizing...
+                     </>
+                   ) : 'Sync Identity Profile'}
+                </button>
+             </div>
+          </form>
         </div>
-
-        <form onSubmit={handleUpdate} className="px-8 pt-20 pb-8 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-              <input type="text" className="input-field" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-              <input type="email" className="input-field bg-gray-50 text-gray-500" value={formData.email} disabled />
-              <span className="text-xs text-gray-400 mt-1 block">Email cannot be changed</span>
-            </div>
-            
-            {user.role === 'farmer' && (
-              <>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Farm Name</label>
-                  <input type="text" className="input-field" value={formData.farmName} onChange={e => setFormData({...formData, farmName: e.target.value})} />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                  <input type="tel" className="input-field" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} />
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Farm Description / Bio</label>
-                  <textarea rows="3" className="input-field py-3" value={formData.bio} onChange={e => setFormData({...formData, bio: e.target.value})}></textarea>
-                </div>
-              </>
-            )}
-
-            {user.role === 'customer' && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                <input type="tel" className="input-field" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} />
-              </div>
-            )}
-          </div>
-
-          <div className="border-t border-gray-100 pt-6">
-            <h3 className="font-bold text-gray-800 mb-4">Address Information</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Street Address</label>
-                <input type="text" className="input-field" value={formData.street} onChange={e => setFormData({...formData, street: e.target.value})} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
-                <input type="text" className="input-field" value={formData.city} onChange={e => setFormData({...formData, city: e.target.value})} />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
-                  <input type="text" className="input-field" value={formData.state} onChange={e => setFormData({...formData, state: e.target.value})} />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Pincode</label>
-                  <input type="text" className="input-field" value={formData.pincode} onChange={e => setFormData({...formData, pincode: e.target.value})} />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex justify-end pt-4">
-            <button type="submit" disabled={loading} className="btn-primary px-8 py-3 w-full md:w-auto flex justify-center items-center gap-2">
-              {loading ? (
-                <div className="w-5 h-5 rounded-full border-2 border-white/30 border-t-white animate-spin"></div>
-              ) : 'Save Changes'}
-            </button>
-          </div>
-        </form>
       </div>
     </div>
   );

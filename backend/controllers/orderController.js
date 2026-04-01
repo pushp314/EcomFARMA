@@ -169,10 +169,69 @@ const getFarmerOrders = async (req, res, next) => {
   }
 };
 
+// @desc    Get farmer revenue statistics
+// @route   GET /api/orders/farmer/stats
+// @access  Private (Farmer)
+const getFarmerRevenueStats = async (req, res, next) => {
+  try {
+    const orders = await prisma.order.findMany({
+      where: {
+        items: {
+          some: {
+            product: {
+              farmerId: req.user.id,
+            },
+          },
+        },
+      },
+      include: {
+        items: {
+          where: { product: { farmerId: req.user.id } }
+        }
+      },
+    });
+
+    // Grouping logic for last 6 months
+    const monthlyRevenue = [];
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    
+    // Total lifetime earnings
+    let totalEarnings = 0;
+    const monthGroup = {};
+
+    orders.forEach(order => {
+      const orderRevenue = order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      totalEarnings += orderRevenue;
+
+      const date = new Date(order.createdAt);
+      const m = months[date.getMonth()];
+      monthGroup[m] = (monthGroup[m] || 0) + orderRevenue;
+    });
+
+    const now = new Date();
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const m = months[d.getMonth()];
+      monthlyRevenue.push({ name: m, revenue: monthGroup[m] || 0 });
+    }
+
+    res.status(200).json({
+      success: true,
+      stats: {
+        totalEarnings,
+        monthlyRevenue,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createOrder,
   getMyOrders,
   getOrderById,
   updateOrderStatus,
   getFarmerOrders,
+  getFarmerRevenueStats,
 };

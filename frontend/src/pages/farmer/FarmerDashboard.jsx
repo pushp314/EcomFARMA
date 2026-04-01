@@ -3,18 +3,39 @@ import { useAuth } from '../../context/AuthContext';
 import { productAPI, orderAPI, uploadAPI } from '../../api';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import toast from 'react-hot-toast';
+import { 
+  HiOutlineCube, 
+  HiOutlineClipboardList, 
+  HiOutlinePlus, 
+  HiOutlineTrash, 
+  HiOutlinePencilAlt,
+  HiOutlinePresentationChartLine,
+  HiOutlineTrendingUp
+} from 'react-icons/hi';
+import { 
+  AreaChart, 
+  Area, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer 
+} from 'recharts';
 
 const FarmerDashboard = () => {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState('products'); 
+  const [activeTab, setActiveTab] = useState('inventory'); 
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState(null);
   
+  // Data lists
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [uploading, setUploading] = useState(false);
 
-  // New product form state
-  const [showAddForm, setShowAddForm] = useState(false);
+  // Form states
+  const [showForm, setShowForm] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [uploading, setUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [formData, setFormData] = useState({
@@ -35,18 +56,43 @@ const FarmerDashboard = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      if (activeTab === 'products') {
+      if (activeTab === 'analytics') {
+        const { data } = await orderAPI.getFarmerStats();
+        setStats(data.stats);
+      } else if (activeTab === 'inventory') {
         const { data } = await productAPI.getFarmerProducts();
         setProducts(data.products);
-      } else {
+      } else if (activeTab === 'orders') {
         const { data } = await orderAPI.getFarmerOrders();
         setOrders(data.orders);
       }
     } catch (error) {
-      toast.error('Failed to fetch data');
+      toast.error('Sync failed');
     } finally {
       setLoading(false);
     }
+  };
+
+  const resetForm = () => {
+    setFormData({ name: '', description: '', price: '', category: 'Vegetables', unit: 'kg', stock: '' });
+    setSelectedFile(null);
+    setImagePreview(null);
+    setEditingProduct(null);
+    setShowForm(false);
+  };
+
+  const handleEditClick = (product) => {
+    setEditingProduct(product);
+    setFormData({
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      category: product.category,
+      unit: product.unit,
+      stock: product.stock,
+    });
+    setImagePreview(product.image);
+    setShowForm(true);
   };
 
   const handleFileSelect = (e) => {
@@ -56,9 +102,6 @@ const FarmerDashboard = () => {
       const reader = new FileReader();
       reader.onloadend = () => setImagePreview(reader.result);
       reader.readAsDataURL(file);
-    } else {
-      setSelectedFile(null);
-      setImagePreview(null);
     }
   };
 
@@ -66,7 +109,7 @@ const FarmerDashboard = () => {
     e.preventDefault();
     try {
       setUploading(true);
-      let imageUrl = '';
+      let imageUrl = editingProduct ? editingProduct.image : '';
 
       if (selectedFile) {
         const fileData = new FormData();
@@ -75,250 +118,302 @@ const FarmerDashboard = () => {
         imageUrl = data.url;
       }
 
-      await productAPI.create({ ...formData, image: imageUrl });
+      const payload = { ...formData, image: imageUrl };
+
+      if (editingProduct) {
+        await productAPI.update(editingProduct.id, payload);
+        toast.success('Product updated!');
+      } else {
+        await productAPI.create(payload);
+        toast.success('Product listed live!');
+      }
       
-      toast.success('Product added successfully!');
-      setShowAddForm(false);
-      setFormData({ name: '', description: '', price: '', category: 'Vegetables', unit: 'kg', stock: '' });
-      setSelectedFile(null);
-      setImagePreview(null);
+      resetForm();
       fetchData();
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to add product');
+      toast.error('Action failed');
     } finally {
       setUploading(false);
     }
   };
 
   const handleDeleteProduct = async (id) => {
-    if (window.confirm('Are you sure you want to delete this product?')) {
+    if (window.confirm('Remove this product?')) {
       try {
         await productAPI.delete(id);
-        toast.success('Product deleted');
+        toast.success('Product removed');
         fetchData();
       } catch (error) {
-        toast.error('Failed to delete product');
+        toast.error('Action failed');
       }
     }
   };
 
-  const handleUpdateOrderStatus = async (orderId, status) => {
+  const handleStatusUpdate = async (orderId, status) => {
     try {
       await orderAPI.updateStatus(orderId, { status });
-      toast.success('Order status updated');
+      toast.success(`Success! Status changed to ${status}`);
       fetchData();
     } catch (error) {
-      toast.error('Failed to update status');
+      toast.error('Update failed');
     }
   };
 
   if (!user?.isApproved) {
     return (
-      <div className="container-custom py-20 text-center">
-        <div className="text-6xl mb-4">⏳</div>
-        <h2 className="text-3xl font-display font-bold text-gray-800 mb-4">Account Pending Approval</h2>
-        <p className="text-gray-600 max-w-lg mx-auto">
-          Your farmer account is currently being reviewed by our administration team. 
-          You will be able to add products and receive orders once approved.
-        </p>
+      <div className="h-[80vh] flex items-center justify-center container-custom">
+        <div className="bg-white p-12 rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 text-center max-w-lg animate-fade-in">
+           <div className="w-20 h-20 bg-orange-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <span className="text-4xl animate-pulse">🌾</span>
+           </div>
+           <h2 className="text-3xl font-display font-bold text-gray-900 mb-4">Awaiting Verification</h2>
+           <p className="text-gray-500 leading-relaxed">
+             Our team is currently reviewing your farmer credentials. Once authorized, you'll be able to publish your harvest and manage orders globally.
+           </p>
+        </div>
       </div>
     );
   }
 
+  const TabButton = ({ id, icon: Icon, label }) => (
+    <button
+      onClick={() => setActiveTab(id)}
+      className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${
+        activeTab === id ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/30' : 'text-gray-500 hover:bg-gray-50'
+      }`}
+    >
+      <Icon className="text-lg" />
+      {label}
+    </button>
+  );
+
   return (
-    <div className="container-custom py-12">
-      <div className="flex justify-between items-end mb-8">
-        <div>
-          <h1 className="text-3xl font-display font-bold text-gray-800">
-            Welcome, {user.farmName || user.name}
-          </h1>
-          <p className="text-gray-500 mt-1">Manage your farm's inventory and customer orders.</p>
-        </div>
-        
-        {/* Tabs */}
-        <div className="flex bg-gray-100 p-1 rounded-lg">
-          <button
-            className={`px-6 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'products' ? 'bg-white shadow text-green-700' : 'text-gray-500 hover:text-gray-700'}`}
-            onClick={() => setActiveTab('products')}
-          >
-            Inventory
-          </button>
-          <button
-            className={`px-6 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'orders' ? 'bg-white shadow text-green-700' : 'text-gray-500 hover:text-gray-700'}`}
-            onClick={() => setActiveTab('orders')}
-          >
-            Orders
-          </button>
-        </div>
+    <div className="bg-gray-50 min-h-screen">
+      <div className="container-custom py-12">
+        <header className="flex flex-wrap justify-between items-end gap-6 mb-12">
+           <div>
+              <p className="text-xs font-bold text-primary-600 uppercase tracking-widest mb-1">Farmer Hub</p>
+              <h1 className="text-4xl font-display font-bold text-gray-900 leading-tight">Harvest Board</h1>
+              <p className="text-gray-500">Welcome back, {user.farmName || user.name}</p>
+           </div>
+
+           <div className="flex bg-white p-1.5 rounded-2xl shadow-sm border border-gray-100">
+              <TabButton id="inventory" icon={HiOutlineCube} label="Market Stock" />
+              <TabButton id="orders" icon={HiOutlineClipboardList} label="Incoming Orders" />
+              <TabButton id="analytics" icon={HiOutlinePresentationChartLine} label="Sales Data" />
+           </div>
+        </header>
+
+        {loading ? (
+          <div className="h-64 flex items-center justify-center"><LoadingSpinner /></div>
+        ) : activeTab === 'analytics' && stats ? (
+          <div className="space-y-8 animate-fade-in">
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm flex items-center gap-6">
+                   <div className="w-16 h-16 bg-primary-50 rounded-2xl flex items-center justify-center text-primary-600">
+                      <HiOutlineTrendingUp className="text-3xl" />
+                   </div>
+                   <div>
+                      <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Total Lifetime Earnings</p>
+                      <h3 className="text-3xl font-bold text-gray-900 tracking-tight">₹{stats.totalEarnings?.toLocaleString()}</h3>
+                   </div>
+                </div>
+                {/* Visual Placeholder for more stats */}
+                <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm flex items-center gap-6">
+                   <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 text-3xl">📦</div>
+                   <div>
+                      <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Performance Index</p>
+                      <h3 className="text-3xl font-bold text-gray-900 tracking-tight">Top Merchant</h3>
+                   </div>
+                </div>
+             </div>
+
+             <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
+                <h3 className="font-bold text-gray-900 mb-8">Monthly Earnings Growth</h3>
+                <div className="h-[300px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={stats.monthlyRevenue}>
+                      <defs>
+                        <linearGradient id="colorEarnings" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#16a34a" stopOpacity={0.1}/>
+                          <stop offset="95%" stopColor="#16a34a" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12}} dy={10} />
+                      <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12}} />
+                      <Tooltip />
+                      <Area type="monotone" dataKey="revenue" stroke="#16a34a" strokeWidth={3} fillOpacity={1} fill="url(#colorEarnings)" />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+             </div>
+          </div>
+        ) : activeTab === 'inventory' ? (
+          <div className="space-y-6">
+             <div className="flex justify-between items-center bg-white p-4 pr-6 rounded-2xl shadow-sm border border-gray-100">
+               <h2 className="font-bold text-gray-900 ml-4">Stock Management ({products.length})</h2>
+               <button onClick={() => setShowForm(true)} className="flex items-center gap-2 btn-primary py-2.5 px-6 rounded-xl shadow-lg shadow-primary-500/20">
+                 <HiOutlinePlus className="text-lg" />
+                 Add Produce
+               </button>
+             </div>
+
+             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-slide-up">
+                {products.map(product => (
+                  <div key={product.id} className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden group">
+                     <div className="h-48 relative overflow-hidden">
+                       <img src={product.image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400'} alt={product.name} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                       <div className="absolute top-4 right-4 flex gap-2">
+                          <button onClick={() => handleEditClick(product)} className="p-2 bg-white/90 backdrop-blur rounded-lg shadow-sm text-primary-600 hover:bg-primary-600 hover:text-white transition-all"><HiOutlinePencilAlt /></button>
+                          <button onClick={() => handleDeleteProduct(product.id)} className="p-2 bg-white/90 backdrop-blur rounded-lg shadow-sm text-red-500 hover:bg-red-500 hover:text-white transition-all"><HiOutlineTrash /></button>
+                       </div>
+                     </div>
+                     <div className="p-6">
+                        <div className="flex justify-between items-start mb-4">
+                           <div>
+                              <h3 className="font-bold text-gray-900 text-lg mb-1">{product.name}</h3>
+                              <span className="text-[10px] bg-primary-50 text-primary-700 px-2 py-1 rounded font-bold uppercase tracking-widest">{product.category}</span>
+                           </div>
+                           <div className="text-right">
+                              <p className="text-xl font-bold text-primary-700">₹{product.price}</p>
+                              <p className="text-[10px] text-gray-400 font-bold uppercase">/{product.unit}</p>
+                           </div>
+                        </div>
+                        <div className="flex items-center justify-between pt-4 border-t border-gray-50">
+                           <div className="flex items-center gap-2">
+                              <div className={`w-2 h-2 rounded-full ${product.stock > 10 ? 'bg-green-500' : 'bg-orange-500 animate-pulse'}`}></div>
+                              <span className="text-xs text-gray-500 font-medium">Stock: {product.stock} {product.unit}</span>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                ))}
+             </div>
+             {products.length === 0 && <div className="py-20 text-center bg-white rounded-3xl border border-gray-50 text-gray-400 italic font-medium tracking-wide shadow-sm shadow-gray-100">Your marketplace inventory is currently empty.</div>}
+          </div>
+        ) : (
+          <div className="space-y-6 animate-slide-up">
+             {orders.map(order => (
+               <div key={order.id} className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden p-6 hover:border-primary-100 transition-all">
+                  <div className="flex flex-wrap items-center justify-between gap-6">
+                     <div className="flex items-center gap-4">
+                        <div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-300">
+                          <HiOutlineClipboardList className="text-2xl" />
+                        </div>
+                        <div>
+                           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">#{order.id.slice(-6)}</p>
+                           <h4 className="font-bold text-gray-900 text-lg">{order.customer?.name}</h4>
+                        </div>
+                     </div>
+
+                     <div className="flex-1 min-w-[200px]">
+                        <div className="flex gap-2 flex-wrap">
+                           {order.items.map((item, idx) => (
+                             <span key={idx} className="text-xs px-3 py-1.5 bg-gray-50 rounded-xl text-gray-600 font-medium border border-gray-100">{item.product?.name} × {item.quantity}</span>
+                           ))}
+                        </div>
+                     </div>
+
+                     <div className="flex flex-col sm:flex-row items-center gap-4">
+                        <select 
+                          className={`text-sm font-bold border-none rounded-2xl px-4 py-2 cursor-pointer focus:ring-0
+                            ${order.status === 'Pending' ? 'bg-yellow-50 text-yellow-700' : 
+                              order.status === 'Shipped' ? 'bg-blue-50 text-blue-700' : 
+                              'bg-green-50 text-green-700'}`}
+                          value={order.status}
+                          onChange={(e) => handleStatusUpdate(order.id, e.target.value)}
+                        >
+                          <option value="Pending">Pending</option>
+                          <option value="Confirmed">Confirmed</option>
+                          <option value="Shipped">Shipped</option>
+                          <option value="Delivered">Delivered</option>
+                        </select>
+
+                        <div className="text-right min-w-[80px]">
+                           <p className="text-lg font-bold text-gray-900">₹{order.totalAmount}</p>
+                           <p className="text-[10px] text-gray-400 font-bold uppercase">{new Date(order.createdAt).toLocaleDateString()}</p>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+             ))}
+             {orders.length === 0 && <div className="py-20 text-center bg-white rounded-3xl border border-gray-100 italic text-gray-400">No active orders found in your backlog.</div>}
+          </div>
+        )}
       </div>
 
-      {loading ? (
-        <div className="py-20"><LoadingSpinner /></div>
-      ) : activeTab === 'products' ? (
-        <div className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-bold text-gray-800">My Products</h2>
-            <button 
-              onClick={() => setShowAddForm(!showAddForm)}
-              className="btn-primary py-2 px-4"
-            >
-              {showAddForm ? 'Cancel' : '+ Add New Product'}
-            </button>
-          </div>
-
-          {showAddForm && (
-            <div className="bg-green-50 rounded-xl p-6 border border-green-100 mb-8">
-              <h3 className="font-bold text-green-800 mb-4">Add Fresh Produce</h3>
-              <form onSubmit={handleProductSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input required type="text" placeholder="Product Name" className="input-field bg-white" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
-                <select required className="input-field bg-white appearance-none" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})}>
-                  {categories.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
-                <input required type="number" placeholder="Price (₹)" min="1" step="0.01" className="input-field bg-white" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} />
-                <div className="flex gap-2">
-                  <input required type="number" placeholder="Stock quantity" min="1" className="input-field bg-white flex-1" value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} />
-                  <select className="input-field bg-white w-24 appearance-none" value={formData.unit} onChange={e => setFormData({...formData, unit: e.target.value})}>
-                    <option value="kg">kg</option>
-                    <option value="g">g</option>
-                    <option value="pieces">pcs</option>
-                    <option value="liters">L</option>
-                    <option value="dozens">dz</option>
-                  </select>
-                </div>
-                
-                {/* Image Upload Area */}
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Product Photo</label>
-                  <div className="flex items-center gap-4">
-                    {imagePreview && (
-                      <div className="w-16 h-16 rounded-lg overflow-hidden shrink-0 shadow-sm border border-gray-200">
-                        <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-                      </div>
-                    )}
-                    <input 
-                      type="file" 
-                      accept="image/*" 
-                      className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-100 file:text-green-700 hover:file:bg-green-200 cursor-pointer" 
-                      onChange={handleFileSelect} 
-                    />
-                  </div>
-                </div>
-
-                <textarea required placeholder="Short description..." className="input-field bg-white md:col-span-2 py-3 h-24" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
-                
-                <div className="md:col-span-2 flex justify-end">
-                  <button type="submit" disabled={uploading} className="btn-primary px-8 flex items-center gap-2">
-                    {uploading ? (
-                      <>
-                        <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin"></div>
-                        Uploading...
-                      </>
-                    ) : (
-                      'Publish Product'
-                    )}
-                  </button>
-                </div>
-              </form>
-            </div>
-          )}
-
-          {products.length === 0 && !showAddForm ? (
-            <div className="text-center py-16 bg-white rounded-xl border border-gray-100 shadow-sm">
-              <h3 className="text-lg font-bold text-gray-700 mb-2">No products added yet</h3>
-              <p className="text-gray-500 mb-4">List your first farm produce to start selling directly to customers.</p>
-              <button onClick={() => setShowAddForm(true)} className="btn-primary py-2 px-6">Add Product</button>
-            </div>
-          ) : (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                  <thead className="bg-gray-50 border-b border-gray-100 text-gray-600 text-sm">
-                    <tr>
-                      <th className="px-6 py-4 font-semibold">Product</th>
-                      <th className="px-6 py-4 font-semibold">Category</th>
-                      <th className="px-6 py-4 font-semibold">Price</th>
-                      <th className="px-6 py-4 font-semibold">Stock</th>
-                      <th className="px-6 py-4 font-semibold text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100 text-gray-800">
-                    {products.map(product => (
-                      <tr key={product.id} className="hover:bg-gray-50/50">
-                        <td className="px-6 py-4 font-medium flex items-center gap-3">
-                            <div className="w-10 h-10 rounded bg-gray-200 bg-cover" style={{backgroundImage: `url(${product.image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=100'})`}}></div>
-                            {product.name}
-                        </td>
-                        <td className="px-6 py-4"><span className="bg-green-50 text-green-700 text-xs font-bold px-2 py-1 rounded">{product.category}</span></td>
-                        <td className="px-6 py-4 font-semibold text-green-700">₹{product.price} <span className="text-xs text-gray-500 font-normal">/{product.unit}</span></td>
-                        <td className="px-6 py-4">{product.stock} {product.unit}</td>
-                        <td className="px-6 py-4 text-right space-x-3">
-                          <button onClick={() => handleDeleteProduct(product.id)} className="text-red-500 hover:text-red-700 text-sm font-medium">Delete</button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+      {/* Product Form Modal (Add/Edit) */}
+      {showForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
+           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={resetForm}></div>
+           <div className="relative bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl p-8 md:p-10 max-h-[90vh] overflow-y-auto animate-zoom-in">
+              <div className="flex justify-between items-center mb-10">
+                 <div>
+                    <h3 className="text-2xl font-bold text-gray-900">{editingProduct ? 'Edit Listing' : 'Publish Produce'}</h3>
+                    <p className="text-sm text-gray-500">Provide accurate details for shoppers.</p>
+                 </div>
+                 <button onClick={resetForm} className="p-3 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-colors">✕</button>
               </div>
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="space-y-6">
-          <h2 className="text-xl font-bold text-gray-800">Customer Orders</h2>
-          {orders.length === 0 ? (
-            <div className="text-center py-16 bg-white rounded-xl border border-gray-100 shadow-sm">
-              <h3 className="text-lg font-bold text-gray-700 mb-2">No orders yet</h3>
-              <p className="text-gray-500">When customers buy your products, they will appear here.</p>
-            </div>
-          ) : (
-            <div className="grid gap-6">
-              {orders.map(order => (
-                <div key={order.id} className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-                  <div className="bg-gray-50 px-6 py-4 border-b border-gray-100 flex flex-wrap justify-between items-center gap-4">
-                    <div>
-                      <p className="text-xs text-gray-500 font-semibold uppercase">Customer</p>
-                      <p className="font-medium text-gray-800">{order.customer?.name}</p>
+
+              <form onSubmit={handleProductSubmit} className="space-y-6">
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                       <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">Product Name</label>
+                       <input required type="text" className="w-full bg-gray-50 border-none rounded-2xl py-3 px-4 focus:ring-2 focus:ring-primary-500" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
                     </div>
-                    <div>
-                      <p className="text-xs text-gray-500 font-semibold uppercase">Contact</p>
-                      <p className="text-sm text-gray-600">{order.customer?.email}</p>
+                    <div className="space-y-2">
+                       <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">Category</label>
+                       <select className="w-full bg-gray-50 border-none rounded-2xl py-3 px-4 focus:ring-2 focus:ring-primary-500 cursor-pointer" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})}>
+                          {categories.map(c => <option key={c} value={c}>{c}</option>)}
+                       </select>
                     </div>
-                    <div>
-                      <p className="text-xs text-gray-500 font-semibold uppercase">Order Date</p>
-                      <p className="text-sm text-gray-800">{new Date(order.createdAt).toLocaleDateString()}</p>
+                    <div className="space-y-2">
+                       <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">Price (₹)</label>
+                       <input required type="number" className="w-full bg-gray-50 border-none rounded-2xl py-3 px-4 focus:ring-2 focus:ring-primary-500" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} />
                     </div>
-                    <div>
-                      <select 
-                        className={`text-sm font-bold border-none rounded-lg focus:ring-2 px-3 py-1 cursor-pointer
-                          ${order.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' : 
-                            order.status === 'Shipped' ? 'bg-blue-100 text-blue-800' : 
-                            'bg-green-100 text-green-800'}`}
-                        value={order.status}
-                        onChange={(e) => handleUpdateOrderStatus(order.id, e.target.value)}
-                      >
-                        <option value="Pending">Pending</option>
-                        <option value="Confirmed">Confirmed</option>
-                        <option value="Shipped">Shipped</option>
-                        <option value="Delivered">Delivered</option>
-                      </select>
+                    <div className="grid grid-cols-2 gap-4">
+                       <div className="space-y-2">
+                          <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">Stock</label>
+                          <input required type="number" className="w-full bg-gray-50 border-none rounded-2xl py-3 px-4 focus:ring-2 focus:ring-primary-500" value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} />
+                       </div>
+                       <div className="space-y-2">
+                          <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">Unit</label>
+                          <select className="w-full bg-gray-50 border-none rounded-2xl py-3 px-4 focus:ring-2 focus:ring-primary-500 cursor-pointer" value={formData.unit} onChange={e => setFormData({...formData, unit: e.target.value})}>
+                             <option value="kg">kg</option>
+                             <option value="g">g</option>
+                             <option value="pieces">pcs</option>
+                             <option value="liters">L</option>
+                             <option value="dozens">dz</option>
+                          </select>
+                       </div>
                     </div>
-                  </div>
-                  
-                  <div className="p-6">
-                    <h4 className="font-semibold text-gray-700 mb-3 text-sm">Products to package:</h4>
-                    <ul className="divide-y divide-gray-50">
-                      {order.items.map(item => (
-                        <li key={item.id} className="py-2 flex justify-between">
-                          <span>{item.quantity}x {item.product?.name}</span>
-                          <span className="font-medium text-gray-600">₹{item.price * item.quantity}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+                 </div>
+
+                 <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">Product Description</label>
+                    <textarea required className="w-full bg-gray-50 border-none rounded-2xl py-3 px-4 h-32 focus:ring-2 focus:ring-primary-500" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})}></textarea>
+                 </div>
+
+                 <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">Display Image {editingProduct && '(Leave empty to keep current)'}</label>
+                    <div className="flex items-center gap-6 p-4 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
+                       {imagePreview && (
+                         <div className="w-20 h-20 rounded-2xl overflow-hidden shrink-0 border border-white shadow-sm">
+                            <img src={imagePreview} className="w-full h-full object-cover" />
+                         </div>
+                       )}
+                       <input type="file" accept="image/*" className="text-xs text-gray-500 cursor-pointer" onChange={handleFileSelect} />
+                    </div>
+                 </div>
+
+                 <div className="pt-6">
+                    <button disabled={uploading} className="w-full btn-primary py-4 rounded-2xl shadow-xl shadow-primary-500/20 font-bold tracking-wide">
+                       {uploading ? 'Processing Harvest...' : (editingProduct ? 'Save Updates' : 'Publish Direct Listing')}
+                    </button>
+                 </div>
+              </form>
+           </div>
         </div>
       )}
     </div>

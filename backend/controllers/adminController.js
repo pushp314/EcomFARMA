@@ -84,25 +84,50 @@ const getAllOrders = async (req, res, next) => {
 // @access  Private (Admin)
 const getDashboardStats = async (req, res, next) => {
   try {
-    const [totalUsers, totalProducts, totalOrders] = await Promise.all([
+    const [totalUsers, totalProducts, totalOrders, farmers, customers] = await Promise.all([
       prisma.user.count(),
       prisma.product.count(),
       prisma.order.count(),
+      prisma.user.count({ where: { role: 'farmer' } }),
+      prisma.user.count({ where: { role: 'customer' } }),
     ]);
 
-    // Calculate total revenue from all orders
+    // Calculate total revenue
     const orders = await prisma.order.findMany({
-      select: { totalAmount: true },
+      select: { totalAmount: true, createdAt: true },
     });
-    const revenue = orders.reduce((sum, order) => sum + order.totalAmount, 0);
+    const totalRevenue = orders.reduce((sum, order) => sum + order.totalAmount, 0);
+
+    // Monthly breakdown (simple last 6 months)
+    const monthlyRevenue = [];
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    
+    // Grouping logic for simplicity in this MVP
+    const monthGroup = {};
+    orders.forEach(order => {
+      const date = new Date(order.createdAt);
+      const m = months[date.getMonth()];
+      monthGroup[m] = (monthGroup[m] || 0) + order.totalAmount;
+    });
+
+    // Take current month and previous 5
+    const now = new Date();
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const m = months[d.getMonth()];
+      monthlyRevenue.push({ name: m, revenue: monthGroup[m] || 0 });
+    }
 
     res.status(200).json({
       success: true,
       stats: {
         totalUsers,
+        totalFarmers: farmers,
+        totalCustomers: customers,
         totalProducts,
         totalOrders,
-        revenue,
+        revenue: totalRevenue,
+        monthlyRevenue,
       },
     });
   } catch (error) {
