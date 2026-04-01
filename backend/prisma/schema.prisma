@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String  @id @default(uuid())
+  name      String
+  email     String  @unique
+  password  String
+  role      String  @default("customer")
+  phone     String?
+  avatarUrl String? @default("https://ui-avatars.com/api/?background=22c55e&color=fff&name=User")
+
+  farmName        String?
+  farmDescription String?
+  isApproved      Boolean @default(false)
+
+  street  String?
+  city    String?
+  state   String?
+  pincode String?
+  country String? @default("India")
+
+  latitude  Float?
+  longitude Float?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  products Product[] @relation("FarmerProducts")
+  orders   Order[]   @relation("CustomerOrders")
+  reviews  Review[]
+}
+
+model Product {
+  id          String  @id @default(uuid())
+  name        String
+  description String?
+  price       Float
+  category    String
+  image       String?
+  stock       Int     @default(0)
+  unit        String  @default("kg")
+  rating      Float   @default(0.0)
+
+  farmerId String
+  farmer   User   @relation("FarmerProducts", fields: [farmerId], references: [id], onDelete: Cascade)
+
+  orderItems OrderItem[]
+  reviews    Review[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Order {
+  id            String  @id @default(uuid())
+  totalAmount   Float
+  status        String  @default("Pending")
+  paymentStatus String  @default("Unpaid")
+  paymentId     String?
+
+  customerId String
+  customer   User   @relation("CustomerOrders", fields: [customerId], references: [id], onDelete: Cascade)
+
+  items OrderItem[]
+
+  shippingStreet  String?
+  shippingCity    String?
+  shippingState   String?
+  shippingPincode String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model OrderItem {
+  id       String @id @default(uuid())
+  quantity Int
+  price    Float
+
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model Review {
+  id      String  @id @default(uuid())
+  rating  Int
+  comment String?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
