@@ -76,8 +76,8 @@ const OrderDetails = () => {
                                <img src={item.product?.image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=200'} className="w-full h-full object-cover" />
                             </div>
                             <div className="flex-1">
-                               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">SKU ID: {item.product?.id.slice(-6)}</p>
-                               <h3 className="font-bold text-gray-900 text-lg group-hover:text-primary-600 transition-colors">{item.product?.name}</h3>
+                               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">SKU ID: {item.product?.id?.slice(-6) || 'N/A'}</p>
+                               <h3 className="font-bold text-gray-900 text-lg group-hover:text-primary-600 transition-colors">{item.product?.name || 'Produce Item'}</h3>
                                <p className="text-xs font-bold text-primary-600">Merchant Product Code</p>
                             </div>
                             <div className="text-right min-w-[120px]">

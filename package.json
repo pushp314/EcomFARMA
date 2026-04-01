@@ -1,0 +1,27 @@
+{
+  "name": "ecomfarma",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "concurrently \"npm run backend\" \"npm run frontend\"",
+    "frontend": "cd frontend && npm run dev",
+    "backend": "cd backend && npm run dev",
+    "seed": "cd backend && npm run seed"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pushp314/EcomFARMA.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/pushp314/EcomFARMA/issues"
+  },
+  "homepage": "https://github.com/pushp314/EcomFARMA#readme",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
