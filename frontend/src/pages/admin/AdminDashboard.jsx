@@ -9,7 +9,7 @@ import {
   HiOutlineDocumentReport,
   HiOutlineCheckCircle,
   HiOutlineXCircle,
-  HiOutlineArrowTrendingUp,
+  HiOutlineTrendingUp,
   HiOutlineUsers,
 } from 'react-icons/hi';
 import { 
@@ -124,7 +124,7 @@ const AdminDashboard = () => {
             {/* Quick Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {[
-                { label: 'Total Revenue', value: `₹${stats.revenue?.toLocaleString()}`, icon: HiOutlineArrowTrendingUp, color: 'text-green-600', bg: 'bg-green-50 border-green-100' },
+                { label: 'Total Revenue', value: `₹${stats.revenue?.toLocaleString()}`, icon: HiOutlineTrendingUp, color: 'text-green-600', bg: 'bg-green-50 border-green-100' },
                 { label: 'Global Orders', value: stats.totalOrders, icon: HiOutlineShoppingBag, color: 'text-blue-600', bg: 'bg-blue-50 border-blue-100' },
                 { label: 'Active Farmers', value: stats.totalFarmers, icon: HiOutlineUserGroup, color: 'text-purple-600', bg: 'bg-purple-50 border-purple-100' },
                 { label: 'Userbase Growth', value: stats.totalUsers, icon: HiOutlineUsers, color: 'text-orange-600', bg: 'bg-orange-50 border-orange-100' },
