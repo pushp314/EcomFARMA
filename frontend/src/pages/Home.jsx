@@ -12,12 +12,19 @@ import { FaTractor, FaSeedling, FaLeaf } from 'react-icons/fa';
 
 const Home = () => {
   const categories = [
-    { name: 'Vegetables', icon: FaSeedling, color: 'bg-green-100 text-green-600', count: '120+' },
-    { name: 'Fruits', icon: GiFruitBowl, color: 'bg-orange-100 text-orange-600', count: '85+' },
-    { name: 'Dairy', icon: GiCow, color: 'bg-blue-100 text-blue-600', count: '45+' },
-    { name: 'Grains', icon: GiWheat, color: 'bg-amber-100 text-amber-600', count: '60+' },
-    { name: 'Organic', icon: FaLeaf, color: 'bg-emerald-100 text-emerald-600', count: '200+' },
-    { name: 'Honey & More', icon: GiHoneyJar, color: 'bg-yellow-100 text-yellow-600', count: '30+' },
+    { name: 'Vegetables', image: 'https://images.unsplash.com/photo-1566385101042-1a0aa0c12e8c?w=400&q=80', color: 'bg-green-100 text-green-600', count: '120+' },
+    { name: 'Fruits', image: 'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=400&q=80', color: 'bg-orange-100 text-orange-600', count: '85+' },
+    { name: 'Dairy', image: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=400&q=80', color: 'bg-blue-100 text-blue-600', count: '45+' },
+    { name: 'Grains', image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&q=80', color: 'bg-amber-100 text-amber-600', count: '60+' },
+    { name: 'Organic', image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&q=80', color: 'bg-emerald-100 text-emerald-600', count: '200+' },
+    { name: 'Spices', image: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=400&q=80', color: 'bg-yellow-100 text-yellow-600', count: '30+' },
+  ];
+
+  const featuredProducts = [
+    { name: 'Organic Tomatoes', price: 45, unit: 'kg', image: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=600&q=80' },
+    { name: 'A2 Cow Ghee', price: 850, unit: 'L', image: 'https://images.unsplash.com/photo-1627042633145-b780d842bac7?w=600&q=80' },
+    { name: 'Alphonso Mangoes', price: 800, unit: 'doz', image: 'https://images.unsplash.com/photo-1553284965-83fd3e82fa5a?w=600&q=80' },
+    { name: 'Raw Honey', price: 450, unit: 'L', image: 'https://images.unsplash.com/photo-1587049352847-4d4b1a45ab23?w=600&q=80' },
   ];
 
   const features = [
@@ -58,13 +65,13 @@ const Home = () => {
     {
       name: 'Rajesh Patel',
       role: 'Organic Farmer, Gujarat',
-      text: 'FarmFresh has transformed my income. I now sell directly to customers and earn 40% more than before.',
+      text: 'EcomFarma has transformed my income. I now sell directly to customers and earn 40% more than before.',
       avatar: 'https://ui-avatars.com/api/?name=Rajesh+Patel&background=22c55e&color=fff',
     },
     {
       name: 'Anita Singh',
       role: 'Customer, Mumbai',
-      text: 'The vegetables I get from FarmFresh are incredibly fresh. It feels like I have my own farm!',
+      text: 'The vegetables I get from EcomFarma are incredibly fresh. It feels like I have my own farm!',
       avatar: 'https://ui-avatars.com/api/?name=Anita+Singh&background=3b82f6&color=fff',
     },
     {
@@ -192,21 +199,63 @@ const Home = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6">
             {categories.map((cat) => (
               <Link
                 key={cat.name}
                 to={`/marketplace?category=${cat.name.toLowerCase()}`}
-                className="card p-6 text-center group hover:-translate-y-1 cursor-pointer"
+                className="group relative h-48 rounded-[2rem] overflow-hidden shadow-lg hover:-translate-y-2 transition-all duration-500"
               >
-                <div
-                  className={`w-16 h-16 rounded-2xl ${cat.color} flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300`}
-                >
-                  <cat.icon className="text-2xl" />
+                <img src={cat.image} alt={cat.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-6">
+                  <h3 className="text-white font-bold text-lg">{cat.name}</h3>
+                  <p className="text-primary-300 text-xs font-medium uppercase tracking-widest">{cat.count} Items</p>
                 </div>
-                <h3 className="font-semibold text-gray-800 text-sm">{cat.name}</h3>
-                <p className="text-xs text-gray-500 mt-1">{cat.count} products</p>
               </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ===================== FEATURED PRODUCTS ===================== */}
+      <section className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-wrap justify-between items-end gap-6 mb-16">
+            <div className="max-w-xl">
+              <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary-100 text-primary-700 rounded-full text-[10px] font-bold uppercase tracking-widest mb-4">
+                ✨ Weekly Featured
+              </span>
+              <h2 className="text-4xl md:text-5xl font-display font-extrabold text-gray-900 leading-tight">
+                Fresh <span className="text-primary-600">Harvest</span> Specially Curated for You
+              </h2>
+            </div>
+            <Link to="/marketplace" className="inline-flex items-center gap-2 text-primary-600 font-bold hover:gap-3 transition-all border-b-2 border-primary-100 pb-1">
+              View Entire Collection <HiArrowRight />
+            </Link>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {featuredProducts.map((p) => (
+              <div key={p.name} className="group bg-white rounded-[2.5rem] border border-gray-100 shadow-xl shadow-gray-200/20 overflow-hidden hover:shadow-2xl hover:shadow-primary-600/10 transition-all duration-500">
+                <div className="h-64 relative overflow-hidden">
+                  <img src={p.image} alt={p.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                  <div className="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest">
+                    Verified
+                  </div>
+                </div>
+                <div className="p-8">
+                  <h3 className="font-bold text-gray-900 text-xl mb-1">{p.name}</h3>
+                  <div className="flex justify-between items-end mt-4">
+                    <div>
+                      <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">Price</p>
+                      <p className="text-2xl font-bold text-primary-600">₹{p.price}<span className="text-xs text-gray-400 font-medium">/{p.unit}</span></p>
+                    </div>
+                    <Link to="/marketplace" className="w-12 h-12 bg-primary-50 rounded-2xl flex items-center justify-center text-primary-600 hover:bg-primary-600 hover:text-white transition-colors duration-300">
+                      <HiArrowRight className="text-xl" />
+                    </Link>
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         </div>
@@ -217,7 +266,7 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary-100 text-primary-700 rounded-full text-sm font-semibold mb-4">
-              ⚡ Why FarmFresh?
+              ⚡ Why EcomFarma?
             </span>
             <h2 className="section-title">
               The <span className="gradient-text">Smarter</span> Way to Buy & Sell

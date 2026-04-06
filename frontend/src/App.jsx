@@ -23,8 +23,11 @@ import Profile from './pages/Profile';
 import FarmerDashboard from './pages/farmer/FarmerDashboard';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import OrderDetails from './pages/OrderDetails';
+import FarmerProfile from './pages/FarmerProfile';
+import Wishlist from './pages/Wishlist';
 
 import { CartProvider } from './context/CartContext';
+import { WishlistProvider } from './context/WishlistContext';
 
 // Layout wrapper for pages with Navbar + Footer
 const MainLayout = ({ children }) => (
@@ -43,8 +46,9 @@ const AuthLayout = ({ children }) => (
 function App() {
   return (
     <AuthProvider>
-      <CartProvider>
-        <Router>
+      <WishlistProvider>
+        <CartProvider>
+          <Router>
           {/* Toast notifications */}
         <Toaster
           position="top-right"
@@ -115,6 +119,24 @@ function App() {
             element={
               <MainLayout>
                 <ProductDetails />
+              </MainLayout>
+            }
+          />
+          <Route
+            path="/farmer/:id"
+            element={
+              <MainLayout>
+                <FarmerProfile />
+              </MainLayout>
+            }
+          />
+          <Route
+            path="/wishlist"
+            element={
+              <MainLayout>
+                <ProtectedRoute roles={['customer']}>
+                  <Wishlist />
+                </ProtectedRoute>
               </MainLayout>
             }
           />
@@ -213,8 +235,9 @@ function App() {
             }
           />
         </Routes>
-        </Router>
-      </CartProvider>
+          </Router>
+        </CartProvider>
+      </WishlistProvider>
     </AuthProvider>
   );
 }

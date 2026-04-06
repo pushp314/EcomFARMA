@@ -65,7 +65,7 @@ const Login = () => {
             <div className="w-14 h-14 bg-white/10 backdrop-blur-xl rounded-2xl flex items-center justify-center border border-white/20">
               <GiWheat className="text-3xl text-primary-300" />
             </div>
-            <span className="font-display font-bold text-2xl">FarmFresh</span>
+            <span className="font-display font-bold text-2xl">EcomFarma</span>
           </div>
 
           <h1 className="font-display text-4xl xl:text-5xl font-bold leading-tight">
@@ -108,7 +108,7 @@ const Login = () => {
               <GiWheat className="text-white text-xl" />
             </div>
             <span className="font-display font-bold text-xl text-gray-900">
-              Farm<span className="text-primary-600">Fresh</span>
+              Ecom<span className="text-primary-600">Farma</span>
             </span>
           </div>
 
@@ -116,6 +116,8 @@ const Login = () => {
             <h2 className="font-display text-3xl font-bold text-gray-900">Welcome back!</h2>
             <p className="text-gray-500 mt-2">Sign in to continue to your account.</p>
           </div>
+
+
 
           {/* Demo Account Quick Access */}
           <div className="mb-6">
@@ -135,6 +137,9 @@ const Login = () => {
               ))}
             </div>
           </div>
+
+          {/* End Demo Account Quick Access */}
+
 
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Email */}

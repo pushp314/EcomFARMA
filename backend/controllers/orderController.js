@@ -174,6 +174,11 @@ const getFarmerOrders = async (req, res, next) => {
 // @access  Private (Farmer)
 const getFarmerRevenueStats = async (req, res, next) => {
   try {
+    const products = await prisma.product.findMany({
+      where: { farmerId: req.user.id },
+      select: { id: true, name: true, stock: true }
+    });
+
     const orders = await prisma.order.findMany({
       where: {
         items: {
@@ -197,10 +202,17 @@ const getFarmerRevenueStats = async (req, res, next) => {
     
     // Total lifetime earnings
     let totalEarnings = 0;
+    let totalItemsSold = 0;
     const monthGroup = {};
 
     orders.forEach(order => {
-      const orderRevenue = order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      let orderRevenue = 0;
+      order.items.forEach(item => {
+        const itemRev = item.price * item.quantity;
+        orderRevenue += itemRev;
+        totalItemsSold += item.quantity;
+      });
+      
       totalEarnings += orderRevenue;
 
       const date = new Date(order.createdAt);
@@ -212,6 +224,8 @@ const getFarmerRevenueStats = async (req, res, next) => {
     for (let i = 5; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const m = months[d.getMonth()];
+      const year = d.getFullYear();
+      const key = `${m} ${year}`;
       monthlyRevenue.push({ name: m, revenue: monthGroup[m] || 0 });
     }
 
@@ -219,6 +233,9 @@ const getFarmerRevenueStats = async (req, res, next) => {
       success: true,
       stats: {
         totalEarnings,
+        totalItemsSold,
+        activeProducts: products.length,
+        lowStockCount: products.filter(p => p.stock < 10).length,
         monthlyRevenue,
       },
     });

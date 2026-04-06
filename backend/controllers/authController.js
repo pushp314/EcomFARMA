@@ -206,4 +206,46 @@ const updateProfile = async (req, res, next) => {
   }
 };
 
-module.exports = { register, login, getMe, logout, updateProfile };
+// @desc    Get public farmer profile
+// @route   GET /api/auth/farmer/:id
+// @access  Public
+const getFarmerProfile = async (req, res, next) => {
+  try {
+    const farmer = await prisma.user.findUnique({
+      where: { id: req.params.id },
+      include: {
+        products: true
+      }
+    });
+
+    if (!farmer || farmer.role !== 'farmer') {
+      return res.status(404).json({
+        success: false,
+        message: 'Farmer not found',
+      });
+    }
+
+    // Prepare public safe response
+    const publicProfile = {
+      id: farmer.id,
+      name: farmer.name,
+      farmName: farmer.farmName,
+      farmDescription: farmer.farmDescription,
+      city: farmer.city,
+      state: farmer.state,
+      country: farmer.country,
+      avatarUrl: farmer.avatarUrl,
+      products: farmer.products,
+      createdAt: farmer.createdAt
+    };
+
+    res.status(200).json({
+      success: true,
+      farmer: publicProfile,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { register, login, getMe, logout, updateProfile, getFarmerProfile };

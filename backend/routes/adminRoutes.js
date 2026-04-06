@@ -5,6 +5,9 @@ const {
   toggleApproveFarmer,
   getAllOrders,
   getDashboardStats,
+  deleteUser,
+  updateOrder,
+  getAdminProducts,
 } = require('../controllers/adminController');
 const { protect, authorize } = require('../middleware/auth');
 
@@ -14,7 +17,10 @@ router.use(authorize('admin'));
 
 router.get('/stats', getDashboardStats);
 router.get('/users', getUsers);
+router.delete('/users/:id', deleteUser);
 router.put('/users/:id/approve', toggleApproveFarmer);
 router.get('/orders', getAllOrders);
+router.put('/orders/:id', updateOrder);
+router.get('/products', getAdminProducts);
 
 module.exports = router;

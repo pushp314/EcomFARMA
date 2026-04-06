@@ -16,6 +16,10 @@ const getUsers = async (req, res, next) => {
         role: true,
         isApproved: true,
         farmName: true,
+        phone: true,
+        city: true,
+        state: true,
+        avatarUrl: true,
         createdAt: true,
       },
       orderBy: { createdAt: 'desc' },
@@ -135,9 +139,61 @@ const getDashboardStats = async (req, res, next) => {
   }
 };
 
+// @desc    Delete user
+// @route   DELETE /api/admin/users/:id
+// @access  Private (Admin)
+const deleteUser = async (req, res, next) => {
+  try {
+    const userId = req.params.id;
+    await prisma.user.delete({ where: { id: userId } });
+    res.status(200).json({ success: true, message: 'User deleted' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Update order status
+// @route   PUT /api/admin/orders/:id
+// @access  Private (Admin)
+const updateOrder = async (req, res, next) => {
+  try {
+    const orderId = req.params.id;
+    const { status, paymentStatus } = req.body;
+    
+    const order = await prisma.order.update({
+      where: { id: orderId },
+      data: { status, paymentStatus },
+    });
+    
+    res.status(200).json({ success: true, order });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get all products for admin
+// @route   GET /api/admin/products
+// @access  Private (Admin)
+const getAdminProducts = async (req, res, next) => {
+  try {
+    const products = await prisma.product.findMany({
+      include: {
+        farmer: { select: { name: true, farmName: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+    res.status(200).json({ success: true, products });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getUsers,
   toggleApproveFarmer,
   getAllOrders,
   getDashboardStats,
+  deleteUser,
+  updateOrder,
+  getAdminProducts,
 };

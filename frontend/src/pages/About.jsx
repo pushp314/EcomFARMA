@@ -24,7 +24,7 @@ const About = () => {
             <span className="text-primary-400">Nourishing Communities</span>
           </h1>
           <p className="text-lg text-primary-100 max-w-2xl mx-auto leading-relaxed">
-            FarmFresh bridges the gap between local farmers and consumers, creating a sustainable, transparent, and fair agricultural ecosystem.
+            EcomFarma bridges the gap between local farmers and consumers, creating a sustainable, transparent, and fair agricultural ecosystem.
           </p>
         </div>
       </section>

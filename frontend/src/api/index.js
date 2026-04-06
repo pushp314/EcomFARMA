@@ -7,6 +7,7 @@ export const authAPI = {
   getMe: () => API.get('/auth/me'),
   logout: () => API.post('/auth/logout'),
   updateProfile: (data) => API.put('/auth/profile', data),
+  getFarmerProfile: (id) => API.get('/auth/farmer/' + id),
 };
 
 // Generic Upload API
@@ -47,7 +48,10 @@ export const paymentAPI = {
 // Admin APIs
 export const adminAPI = {
   getUsers: (params) => API.get('/admin/users', { params }),
+  deleteUser: (id) => API.delete(`/admin/users/${id}`),
   toggleApproveFarmer: (id, data) => API.put(`/admin/users/${id}/approve`, data),
   getDashboardStats: () => API.get('/admin/stats'),
   getAllOrders: (params) => API.get('/admin/orders', { params }),
+  updateOrder: (id, data) => API.put(`/admin/orders/${id}`, data),
+  getAdminProducts: () => API.get('/admin/products'),
 };

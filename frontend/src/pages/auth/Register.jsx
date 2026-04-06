@@ -105,7 +105,7 @@ const Register = () => {
       if (formData.role === 'farmer') {
         toast.success('Registration successful! Your farmer account is pending approval.');
       } else {
-        toast.success('Welcome to FarmFresh! 🌾');
+        toast.success('Welcome to EcomFarma! 🌾');
       }
     }
     setSubmitting(false);
@@ -124,13 +124,13 @@ const Register = () => {
             <div className="w-14 h-14 bg-white/10 backdrop-blur-xl rounded-2xl flex items-center justify-center border border-white/20">
               <GiWheat className="text-3xl text-primary-300" />
             </div>
-            <span className="font-display font-bold text-2xl">FarmFresh</span>
+            <span className="font-display font-bold text-2xl">EcomFarma</span>
           </Link>
 
           <h1 className="font-display text-4xl xl:text-5xl font-bold leading-tight">
             Join the
             <br />
-            <span className="text-primary-300">Farm-Fresh</span>
+            <span className="text-primary-300">Ecom-Farma</span>
             <br />
             Revolution
           </h1>
@@ -171,7 +171,7 @@ const Register = () => {
               <GiWheat className="text-white text-xl" />
             </div>
             <span className="font-display font-bold text-xl text-gray-900">
-              Farm<span className="text-primary-600">Fresh</span>
+              Ecom<span className="text-primary-600">Farma</span>
             </span>
           </div>
 

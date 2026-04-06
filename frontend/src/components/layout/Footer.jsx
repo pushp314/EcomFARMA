@@ -47,7 +47,7 @@ const Footer = () => {
             <div className="flex flex-col md:flex-row items-center justify-between gap-6">
               <div>
                 <h3 className="font-display text-2xl md:text-3xl font-bold text-white">
-                  Ready to Go Farm-Fresh?
+                  Ready to Go Organic?
                 </h3>
                 <p className="text-primary-100 mt-2 text-sm md:text-base">
                   Join thousands of farmers and customers building a sustainable food ecosystem.
@@ -82,7 +82,7 @@ const Footer = () => {
                 <GiWheat className="text-white text-xl" />
               </div>
               <span className="font-display font-bold text-xl text-white">
-                Farm<span className="text-primary-400">Fresh</span>
+                Ecom<span className="text-primary-400">Farma</span>
               </span>
             </Link>
             <p className="mt-4 text-sm text-gray-400 leading-relaxed max-w-sm">
@@ -92,7 +92,7 @@ const Footer = () => {
             <div className="mt-6 space-y-2">
               <div className="flex items-center gap-3 text-sm text-gray-400">
                 <HiOutlineMail className="text-primary-500" />
-                <span>hello@farmfresh.com</span>
+                <span>hello@ecomfarma.com</span>
               </div>
               <div className="flex items-center gap-3 text-sm text-gray-400">
                 <HiOutlinePhone className="text-primary-500" />
@@ -130,7 +130,7 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="border-t border-gray-800 mt-12 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-gray-500">
-            © {currentYear} FarmFresh. All rights reserved. Made with 🌱 for rural India.
+            © {currentYear} EcomFarma. All rights reserved. Made with 🌱 for rural India.
           </p>
           <div className="flex items-center gap-3">
             {socials.map(({ icon: Icon, url, label }) => (

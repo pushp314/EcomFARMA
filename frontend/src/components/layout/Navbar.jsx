@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
+import { useWishlist } from '../../context/WishlistContext';
 import {
   HiOutlineShoppingCart,
   HiOutlineUser,
@@ -11,12 +12,16 @@ import {
   HiOutlineViewGrid,
   HiOutlineCog,
   HiOutlineChartBar,
+  HiOutlineHeart,
+  HiHeart,
+  HiOutlineGlobeAlt
 } from 'react-icons/hi';
 import { GiWheat } from 'react-icons/gi';
 
 const Navbar = () => {
   const { user, isAuthenticated, isFarmer, isAdmin, logout } = useAuth();
   const { cartCount } = useCart();
+  const { wishlist } = useWishlist();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -84,10 +89,10 @@ const Navbar = () => {
             </div>
             <div className="flex flex-col">
               <span className={`font-display font-bold text-lg leading-tight transition-colors duration-300 ${isNavbarLight ? 'text-white' : 'text-gray-900'}`}>
-                Farm<span className={isNavbarLight ? 'text-primary-300' : 'text-primary-600'}>Fresh</span>
+                Ecom<span className={isNavbarLight ? 'text-primary-300' : 'text-primary-600'}>Farma</span>
               </span>
               <span className={`text-[10px] font-medium tracking-wider uppercase -mt-0.5 transition-colors duration-300 ${isNavbarLight ? 'text-primary-100' : 'text-gray-500'}`}>
-                Farm to Table
+                India's Fresh Marketplace
               </span>
             </div>
           </Link>
@@ -111,6 +116,25 @@ const Navbar = () => {
 
           {/* Desktop Actions */}
           <div className="hidden lg:flex items-center gap-3">
+            {/* Wishlist Icon */}
+            {!isAdmin && !isFarmer && (
+              <Link
+                to="/wishlist"
+                className={`relative p-2.5 rounded-xl transition-all duration-200 ${
+                  isNavbarLight 
+                    ? 'text-white hover:bg-white/10'
+                    : 'text-gray-600 hover:text-rose-600 hover:bg-rose-50' 
+                }`}
+              >
+                {wishlist.length > 0 ? <HiHeart className="text-xl text-rose-500" /> : <HiOutlineHeart className="text-xl" />}
+                {wishlist.length > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-sm">
+                    {wishlist.length}
+                  </span>
+                )}
+              </Link>
+            )}
+
             {/* Cart (for guests and customers) */}
             {!isFarmer && !isAdmin && (
               <Link
@@ -129,6 +153,19 @@ const Navbar = () => {
                 )}
               </Link>
             )}
+
+            {/* Language Selection */}
+            <button
+              className={`p-2.5 rounded-xl transition-all duration-200 flex items-center gap-1.5 ${
+                isNavbarLight 
+                  ? 'text-white hover:bg-white/10'
+                  : 'text-gray-600 hover:text-primary-600 hover:bg-primary-50' 
+              }`}
+              title="Change Language"
+            >
+              <HiOutlineGlobeAlt className="text-xl" />
+              <span className="text-[10px] font-bold uppercase tracking-wider">EN</span>
+            </button>
 
             {isAuthenticated ? (
               <>

@@ -110,7 +110,7 @@ const ProductDetails = () => {
 
                <h1 className="text-4xl md:text-5xl font-display font-bold text-gray-900 mb-4 leading-tight">{product.name}</h1>
                
-               <div className="flex items-center gap-3 mb-8 p-4 bg-gray-50 rounded-2xl border border-gray-100 hover:border-primary-100 transition-all group">
+               <Link to={`/farmer/${product.farmerId}`} className="flex items-center gap-3 mb-8 p-4 bg-gray-50 rounded-2xl border border-gray-100 hover:border-primary-600/20 hover:bg-white transition-all group">
                   <div className="w-12 h-12 rounded-xl border-2 border-white shadow-sm overflow-hidden group-hover:scale-110 transition-transform">
                     <img src={product.farmer?.avatarUrl || `https://ui-avatars.com/api/?name=${product.farmer?.name}&background=16a34a&color=fff`} className="w-full h-full object-cover" />
                   </div>
@@ -121,7 +121,7 @@ const ProductDetails = () => {
                   <div className="ml-auto text-right">
                     <p className="text-xs font-bold text-primary-600">{product.farmer?.city}, {product.farmer?.state}</p>
                   </div>
-               </div>
+               </Link>
 
                <div className="space-y-6 mb-10">
                   <p className="text-gray-500 leading-relaxed text-lg italic bg-primary-50/30 p-6 rounded-2xl border-l-4 border-primary-500">
@@ -162,7 +162,7 @@ const ProductDetails = () => {
            
            <div className="lg:col-span-1">
               <h2 className="text-3xl font-display font-bold text-gray-900 mb-2">Merchant Integrity</h2>
-              <p className="text-gray-500 text-sm mb-8">Verification of quality by the FarmFresh community.</p>
+              <p className="text-gray-500 text-sm mb-8">Verification of quality by the EcomFarma community.</p>
               
               {user?.role === 'customer' ? (
                 <form onSubmit={submitReview} className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm shadow-gray-200/50 space-y-6">
