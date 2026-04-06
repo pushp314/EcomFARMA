@@ -9,15 +9,17 @@ import {
 } from 'react-icons/hi';
 import { GiWheat, GiFruitBowl, GiCow, GiHoneyJar } from 'react-icons/gi';
 import { FaTractor, FaSeedling, FaLeaf } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
 
 const Home = () => {
+  const { t } = useTranslation();
   const categories = [
-    { name: 'Vegetables', image: 'https://images.unsplash.com/photo-1566385101042-1a0aa0c12e8c?w=400&q=80', color: 'bg-green-100 text-green-600', count: '120+' },
-    { name: 'Fruits', image: 'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=400&q=80', color: 'bg-orange-100 text-orange-600', count: '85+' },
-    { name: 'Dairy', image: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=400&q=80', color: 'bg-blue-100 text-blue-600', count: '45+' },
-    { name: 'Grains', image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&q=80', color: 'bg-amber-100 text-amber-600', count: '60+' },
-    { name: 'Organic', image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&q=80', color: 'bg-emerald-100 text-emerald-600', count: '200+' },
-    { name: 'Spices', image: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=400&q=80', color: 'bg-yellow-100 text-yellow-600', count: '30+' },
+    { name: t('common.vegetables'), image: 'https://images.unsplash.com/photo-1566385101042-1a0aa0c12e8c?w=400&q=80', color: 'bg-green-100 text-green-600', count: '120+' },
+    { name: t('common.fruits'), image: 'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=400&q=80', color: 'bg-orange-100 text-orange-600', count: '85+' },
+    { name: t('common.dairy'), image: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=400&q=80', color: 'bg-blue-100 text-blue-600', count: '45+' },
+    { name: t('common.grains'), image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&q=80', color: 'bg-amber-100 text-amber-600', count: '60+' },
+    { name: t('common.organic'), image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&q=80', color: 'bg-emerald-100 text-emerald-600', count: '200+' },
+    { name: t('common.spices'), image: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=400&q=80', color: 'bg-yellow-100 text-yellow-600', count: '30+' },
   ];
 
   const featuredProducts = [
@@ -107,15 +109,14 @@ const Home = () => {
               </div>
 
               <h1 className="font-display text-4xl sm:text-5xl xl:text-6xl font-extrabold text-white leading-[1.1]">
-                From the <span className="text-primary-300">Farm</span>
+                {t('common.fresh_from')} <span className="text-primary-300">{t('common.farm')}</span>
                 <br />
-                Straight to
+                {t('common.to_your')}
                 <br />
-                Your <span className="text-primary-300">Table</span>
+                {t('common.table')}
               </h1>
               <p className="mt-6 text-lg text-primary-200 leading-relaxed max-w-lg">
-                Empowering rural farmers by connecting them directly with urban consumers.
-                Fresh, organic produce — no middlemen, no markup.
+                {t('common.connecting')}
               </p>
 
               {/* Search Bar */}
@@ -138,13 +139,13 @@ const Home = () => {
               <div className="mt-8 flex items-center gap-6">
                 <Link to="/register?role=farmer" className="btn-primary py-3 px-7">
                   <FaTractor className="mr-2" />
-                  Start Selling
+                  {t('common.start_selling')}
                 </Link>
                 <Link
                   to="/marketplace"
                   className="inline-flex items-center gap-2 text-primary-200 hover:text-white font-semibold transition-colors group"
                 >
-                  Browse Products
+                  {t('common.browse_products')}
                   <HiArrowRight className="group-hover:translate-x-1 transition-transform" />
                 </Link>
               </div>
@@ -189,13 +190,13 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary-100 text-primary-700 rounded-full text-sm font-semibold mb-4">
-              🛒 Shop by Category
+              🛒 {t('common.shop_by_category')}
             </span>
             <h2 className="section-title">
-              Fresh From the <span className="gradient-text">Fields</span>
+              {t('common.fresh_fields')}
             </h2>
             <p className="mt-3 text-gray-500 max-w-md mx-auto">
-              Browse our wide range of fresh farm products sourced directly from verified farmers.
+              {t('common.category_desc')}
             </p>
           </div>
 
@@ -209,7 +210,7 @@ const Home = () => {
                 <img src={cat.image} alt={cat.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-6">
                   <h3 className="text-white font-bold text-lg">{cat.name}</h3>
-                  <p className="text-primary-300 text-xs font-medium uppercase tracking-widest">{cat.count} Items</p>
+                  <p className="text-primary-300 text-xs font-medium uppercase tracking-widest">{cat.count} {t('common.items')}</p>
                 </div>
               </Link>
             ))}

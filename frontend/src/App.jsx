@@ -134,9 +134,7 @@ function App() {
             path="/wishlist"
             element={
               <MainLayout>
-                <ProtectedRoute roles={['customer']}>
                   <Wishlist />
-                </ProtectedRoute>
               </MainLayout>
             }
           />

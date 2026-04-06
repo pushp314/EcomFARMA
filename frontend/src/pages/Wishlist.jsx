@@ -1,17 +1,13 @@
 import { Link } from 'react-router-dom';
 import { useWishlist } from '../context/WishlistContext';
 import { useCart } from '../context/CartContext';
-import { 
-  HiOutlineTrash, 
-  HiOutlineShoppingBag, 
-  HiOutlineHeart, 
-  HiOutlineArrowLeft, 
-  HiOutlineSparkles 
-} from 'react-icons/hi';
+import { HiOutlineTrash, HiOutlineShoppingBag, HiOutlineHeart, HiOutlineArrowLeft, HiOutlineSparkles } from 'react-icons/hi';
+import { useTranslation } from 'react-i18next';
 
 const Wishlist = () => {
   const { wishlist, toggleWishlist } = useWishlist();
   const { addToCart } = useCart();
+  const { t } = useTranslation();
 
   if (wishlist.length === 0) {
     return (
@@ -20,12 +16,12 @@ const Wishlist = () => {
            <div className="bg-white p-16 rounded-[4rem] shadow-xl shadow-gray-200/40 border border-gray-100 max-w-2xl mx-auto animate-fade-in relative overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-primary-50 to-transparent pointer-events-none"></div>
               <div className="w-24 h-24 bg-primary-50 rounded-[2rem] flex items-center justify-center mx-auto mb-8 text-6xl shadow-inner">💚</div>
-              <h1 className="text-4xl font-display font-bold text-gray-900 mb-6 leading-tight">Your Wishlist is Dreaming</h1>
+              <h1 className="text-4xl font-display font-bold text-gray-900 mb-6 leading-tight">{t('wishlist.empty_title')}</h1>
               <p className="text-gray-400 text-lg mb-10 max-w-sm mx-auto font-medium leading-relaxed italic">
-                 Curate your ideal farm-to-table collection and monitor seasonal availability from this hub.
+                 {t('wishlist.empty_subtitle')}
               </p>
               <Link to="/marketplace" className="btn-primary py-4 px-12 rounded-[2rem] text-[10px] font-black uppercase tracking-widest shadow-xl shadow-primary-600/30 inline-flex items-center gap-3">
-                 Explore Harvest <HiOutlineArrowLeft className="rotate-180" />
+                 {t('wishlist.explore_harvest')} <HiOutlineArrowLeft className="rotate-180" />
               </Link>
            </div>
         </div>
@@ -37,17 +33,17 @@ const Wishlist = () => {
     <div className="min-h-screen pt-32 pb-20 bg-[#fafbfc]">
       <div className="container-custom">
         <header className="mb-16 flex flex-wrap justify-between items-end gap-10">
-           <div className="animate-fade-in">
-              <div className="flex items-center gap-2 mb-3">
-                 <HiOutlineSparkles className="text-primary-600" />
-                 <span className="text-[10px] font-bold text-primary-600 uppercase tracking-[0.3em]">Curated Favorites</span>
-              </div>
-              <h1 className="text-5xl font-display font-bold text-gray-900 leading-tight tracking-tight">Your Harvest <span className="text-primary-600">Reserved</span></h1>
-              <p className="text-gray-400 font-medium text-lg mt-3">Monitoring {wishlist.length} artisanal crops for you.</p>
-           </div>
-           <Link to="/marketplace" className="btn-secondary py-4 px-10 rounded-2xl text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 border-2 border-gray-100 hover:border-primary-100 bg-white">
-              <HiOutlineArrowLeft /> Market Index
-           </Link>
+            <div className="animate-fade-in">
+               <div className="flex items-center gap-2 mb-3">
+                  <HiOutlineSparkles className="text-primary-600" />
+                  <span className="text-[10px] font-bold text-primary-600 uppercase tracking-[0.3em]">{t('wishlist.curated_favorites')}</span>
+               </div>
+               <h1 className="text-5xl font-display font-bold text-gray-900 leading-tight tracking-tight">{t('wishlist.your_harvest_reserved')}</h1>
+               <p className="text-gray-400 font-medium text-lg mt-3">{t('wishlist.monitoring', { count: wishlist.length })}</p>
+            </div>
+            <Link to="/marketplace" className="btn-secondary py-4 px-10 rounded-2xl text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 border-2 border-gray-100 hover:border-primary-100 bg-white">
+               <HiOutlineArrowLeft /> {t('wishlist.market_index')}
+            </Link>
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10 animate-slide-up">
@@ -95,9 +91,9 @@ const Wishlist = () => {
                         {product.stock > 0 ? (
                            <>
                               <HiOutlineShoppingBag className="text-base" />
-                              Move to Basket
+                              {t('wishlist.move_to_basket')}
                            </>
-                        ) : 'Sold Out'}
+                        ) : t('wishlist.sold_out')}
                      </button>
                   </div>
                </div>

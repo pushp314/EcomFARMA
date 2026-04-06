@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { GiWheat } from 'react-icons/gi';
 import { HiOutlineEye, HiOutlineEyeOff, HiOutlineMail, HiOutlineLockClosed } from 'react-icons/hi';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -11,6 +12,7 @@ const Login = () => {
   const [submitting, setSubmitting] = useState(false);
 
   const { login, isAuthenticated, error, clearError } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -69,31 +71,30 @@ const Login = () => {
           </div>
 
           <h1 className="font-display text-4xl xl:text-5xl font-bold leading-tight">
-            Fresh from the
+            {t('common.fresh_from')}
             <br />
-            <span className="text-primary-300">Farm</span> to your
+            <span className="text-primary-300">{t('common.farm')}</span> {t('common.to_your')}
             <br />
-            <span className="text-primary-300">Table</span>
+            <span className="text-primary-300">{t('common.table')}</span>
           </h1>
           <p className="mt-6 text-lg text-primary-200 leading-relaxed max-w-md">
-            Connecting rural farmers directly with urban consumers.
-            No middlemen, just pure farm-fresh goodness.
+            {t('common.connecting')}
           </p>
 
           <div className="mt-10 flex items-center gap-6">
             <div className="text-center">
               <p className="text-3xl font-bold text-white">500+</p>
-              <p className="text-sm text-primary-300">Farmers</p>
+              <p className="text-sm text-primary-300">{t('common.farmers')}</p>
             </div>
             <div className="w-px h-12 bg-primary-700" />
             <div className="text-center">
               <p className="text-3xl font-bold text-white">10K+</p>
-              <p className="text-sm text-primary-300">Customers</p>
+              <p className="text-sm text-primary-300">{t('common.customers')}</p>
             </div>
             <div className="w-px h-12 bg-primary-700" />
             <div className="text-center">
               <p className="text-3xl font-bold text-white">50K+</p>
-              <p className="text-sm text-primary-300">Orders</p>
+              <p className="text-sm text-primary-300">{t('common.orders')}</p>
             </div>
           </div>
         </div>
@@ -113,8 +114,8 @@ const Login = () => {
           </div>
 
           <div className="mb-8">
-            <h2 className="font-display text-3xl font-bold text-gray-900">Welcome back!</h2>
-            <p className="text-gray-500 mt-2">Sign in to continue to your account.</p>
+            <h2 className="font-display text-3xl font-bold text-gray-900">{t('auth.login_title')}!</h2>
+            <p className="text-gray-500 mt-2">{t('auth.sign_in_subtitle')}</p>
           </div>
 
 
@@ -122,7 +123,7 @@ const Login = () => {
           {/* Demo Account Quick Access */}
           <div className="mb-6">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-              Quick Demo Access
+              {t('auth.quick_demo')}
             </p>
             <div className="flex gap-2">
               {['admin', 'farmer', 'customer'].map((role) => (
@@ -145,7 +146,7 @@ const Login = () => {
             {/* Email */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                Email Address
+                {t('auth.email_address')}
               </label>
               <div className="relative">
                 <HiOutlineMail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg" />
@@ -162,7 +163,7 @@ const Login = () => {
 
             {/* Password */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Password</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">{t('auth.password')}</label>
               <div className="relative">
                 <HiOutlineLockClosed className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg" />
                 <input
@@ -190,10 +191,10 @@ const Login = () => {
                   type="checkbox"
                   className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                 />
-                <span className="text-sm text-gray-600">Remember me</span>
+                <span className="text-sm text-gray-600">{t('auth.remember_me')}</span>
               </label>
               <Link to="/forgot-password" className="text-sm font-semibold text-primary-600 hover:text-primary-700">
-                Forgot password?
+                {t('auth.forgot_password')}
               </Link>
             </div>
 
@@ -207,18 +208,18 @@ const Login = () => {
               {submitting ? (
                 <span className="flex items-center gap-2">
                   <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Signing in...
+                  {t('auth.signing_in')}
                 </span>
               ) : (
-                'Sign In'
+                t('auth.login_button')
               )}
             </button>
           </form>
 
           <p className="mt-6 text-center text-sm text-gray-500">
-            Don&apos;t have an account?{' '}
+            {t('auth.no_account')}{' '}
             <Link to="/register" className="font-semibold text-primary-600 hover:text-primary-700">
-              Create one now
+              {t('auth.create_one_now')}
             </Link>
           </p>
         </div>

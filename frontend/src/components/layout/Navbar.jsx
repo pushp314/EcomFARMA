@@ -17,6 +17,7 @@ import {
   HiOutlineGlobeAlt
 } from 'react-icons/hi';
 import { GiWheat } from 'react-icons/gi';
+import { useTranslation } from 'react-i18next';
 
 const Navbar = () => {
   const { user, isAuthenticated, isFarmer, isAdmin, logout } = useAuth();
@@ -30,6 +31,12 @@ const Navbar = () => {
   const location = useLocation();
   const isHomePage = location.pathname === '/';
   const isNavbarLight = !scrolled && isHomePage;
+  const { t, i18n } = useTranslation();
+
+  const toggleLanguage = () => {
+    const newLang = i18n.language === 'en' ? 'hi' : 'en';
+    i18n.changeLanguage(newLang);
+  };
 
   // Scroll effect
   useEffect(() => {
@@ -61,9 +68,9 @@ const Navbar = () => {
   };
 
   const navLinks = [
-    { name: 'Home', path: '/' },
-    { name: 'Marketplace', path: '/marketplace' },
-    { name: 'About', path: '/about' },
+    { name: t('navbar.home'), path: '/' },
+    { name: t('navbar.marketplace'), path: '/marketplace' },
+    { name: t('navbar.about'), path: '/about' },
   ];
 
   const getDashboardLink = () => {
@@ -125,6 +132,7 @@ const Navbar = () => {
                     ? 'text-white hover:bg-white/10'
                     : 'text-gray-600 hover:text-rose-600 hover:bg-rose-50' 
                 }`}
+                title={t('navbar.wishlist')}
               >
                 {wishlist.length > 0 ? <HiHeart className="text-xl text-rose-500" /> : <HiOutlineHeart className="text-xl" />}
                 {wishlist.length > 0 && (
@@ -156,15 +164,16 @@ const Navbar = () => {
 
             {/* Language Selection */}
             <button
+              onClick={toggleLanguage}
               className={`p-2.5 rounded-xl transition-all duration-200 flex items-center gap-1.5 ${
                 isNavbarLight 
                   ? 'text-white hover:bg-white/10'
                   : 'text-gray-600 hover:text-primary-600 hover:bg-primary-50' 
               }`}
-              title="Change Language"
+              title={t('common.language')}
             >
               <HiOutlineGlobeAlt className="text-xl" />
-              <span className="text-[10px] font-bold uppercase tracking-wider">EN</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider">{i18n.language?.split('-')[0]}</span>
             </button>
 
             {isAuthenticated ? (
@@ -203,7 +212,7 @@ const Navbar = () => {
                         className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors"
                       >
                         <HiOutlineViewGrid className="text-lg" />
-                        Dashboard
+                        {t('navbar.dashboard')}
                       </Link>
 
                       {isAdmin && (
@@ -221,7 +230,7 @@ const Navbar = () => {
                         className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors"
                       >
                         <HiOutlineCog className="text-lg" />
-                        Settings
+                        {t('navbar.settings')}
                       </Link>
 
                       <div className="border-t border-gray-100 mt-1 pt-1">
@@ -230,7 +239,7 @@ const Navbar = () => {
                           className="flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors w-full"
                         >
                           <HiOutlineLogout className="text-lg" />
-                          Logout
+                          {t('navbar.logout')}
                         </button>
                       </div>
                     </div>
@@ -245,10 +254,10 @@ const Navbar = () => {
                     isNavbarLight ? 'text-white hover:text-primary-200' : 'text-gray-700 hover:text-primary-600'
                   }`}
                 >
-                  Sign In
+                  {t('navbar.login')}
                 </Link>
                 <Link to="/register" className={`btn-primary text-sm ${isNavbarLight && 'bg-white text-primary-700 hover:bg-primary-50 shadow-lg'}`}>
-                  Get Started
+                  {t('navbar.register')}
                 </Link>
               </>
             )}
@@ -305,25 +314,25 @@ const Navbar = () => {
               {isAuthenticated ? (
                 <>
                   <Link to={getDashboardLink()} className="block px-4 py-3 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50">
-                    Dashboard
+                    {t('navbar.dashboard')}
                   </Link>
                   <Link to="/profile" className="block px-4 py-3 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50">
-                    Profile
+                    {t('navbar.profile')}
                   </Link>
                   <button
                     onClick={handleLogout}
                     className="w-full text-left px-4 py-3 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50"
                   >
-                    Logout
+                    {t('navbar.logout')}
                   </button>
                 </>
               ) : (
                 <div className="flex gap-2">
                   <Link to="/login" className="btn-secondary flex-1 text-center text-sm">
-                    Sign In
+                    {t('navbar.login')}
                   </Link>
                   <Link to="/register" className="btn-primary flex-1 text-center text-sm">
-                    Get Started
+                    {t('navbar.register')}
                   </Link>
                 </div>
               )}
